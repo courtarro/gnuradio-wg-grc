@@ -128,7 +128,7 @@ def MessageDialogHelper(type, buttons, title=None, markup=None, extra_buttons=No
     Args:
         title: the title of the window (string)
         markup: the message text with pango markup
-        extra_buttons: a tuple containing pairs of values, each value is the button's text and the button's return value
+        extra_buttons: a tuple containing pairs of values; each value is the button's text and the button's return value
 
     Returns:
         the gtk response from run()
