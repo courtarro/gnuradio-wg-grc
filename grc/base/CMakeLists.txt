@@ -20,6 +20,7 @@
 ########################################################################
 GR_PYTHON_INSTALL(FILES
     odict.py
+    uuid_helper.py
     ParseXML.py
     Block.py
     Connection.py

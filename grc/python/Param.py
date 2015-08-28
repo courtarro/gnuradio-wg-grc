@@ -58,7 +58,7 @@ class Param(_Param, _GUIParam):
         'complex_vector', 'real_vector', 'float_vector', 'int_vector',
         'hex', 'string', 'bool',
         'file_open', 'file_save', 'multiline',
-        'id', 'stream_id',
+        'uuid', 'id', 'stream_id',
         'grid_pos', 'notebook', 'gui_hint',
         'import',
     )
@@ -139,12 +139,13 @@ class Param(_Param, _GUIParam):
                 #vector types
                 'complex_vector': Constants.COMPLEX_VECTOR_COLOR_SPEC,
                 'real_vector': Constants.FLOAT_VECTOR_COLOR_SPEC,
-                                'float_vector': Constants.FLOAT_VECTOR_COLOR_SPEC,
+                'float_vector': Constants.FLOAT_VECTOR_COLOR_SPEC,
                 'int_vector': Constants.INT_VECTOR_COLOR_SPEC,
                 #special
                 'bool': Constants.INT_COLOR_SPEC,
                 'hex': Constants.INT_COLOR_SPEC,
                 'string': Constants.BYTE_VECTOR_COLOR_SPEC,
+                'uuid': Constants.ID_COLOR_SPEC,
                 'id': Constants.ID_COLOR_SPEC,
                 'stream_id': Constants.ID_COLOR_SPEC,
                 'grid_pos': Constants.INT_VECTOR_COLOR_SPEC,
@@ -166,6 +167,8 @@ class Param(_Param, _GUIParam):
         """
         hide = _Param.get_hide(self)
         if hide: return hide
+        #completely hide UUIDs
+        if self.get_key() == 'uuid': return 'part'
         #hide ID in non variable blocks
         if self.get_key() == 'id' and not _show_id_matcher.match(self.get_parent().get_key()): return 'part'
         #hide port controllers for type and nports
@@ -282,6 +285,10 @@ class Param(_Param, _GUIParam):
                 self._stringify_flag = True
                 e = v
             return str(e)
+        #########################
+        # UUID Type
+        #########################
+        elif t == 'uuid': return v      # not evaluated because it's read-only
         #########################
         # Unique ID Type
         #########################

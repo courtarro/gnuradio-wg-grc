@@ -180,6 +180,22 @@ class EnumParam(InputParam):
             pass  # no tooltips for old GTK
 
 
+class ReadOnlyParam(InputParam):
+    """Provide a label to show the value of a read-only parameter."""
+
+    def __init__(self, *args, **kwargs):
+        InputParam.__init__(self, *args, **kwargs)
+        self._input = gtk.Label()
+        self._input.set_text(self.param.get_value())
+        self.pack_start(self._input, False)
+    def get_text(self): return self.param.get_text()
+    def set_tooltip_text(self, text):
+        try:
+            self._input.set_tooltip_text(text)
+        except AttributeError:
+            pass  # no tooltips for old GTK
+
+
 class EnumEntryParam(InputParam):
     """Provide an entry box and drop down menu for Raw Enum types."""
 
@@ -306,6 +322,9 @@ class Param(Element):
         """
         if self.get_type() in ('file_open', 'file_save'):
             input_widget = FileParam(self, *args, **kwargs)
+            
+        elif self.is_readonly():
+            input_widget = ReadOnlyParam(self, *args, **kwargs)
 
         elif self.is_enum():
             input_widget = EnumParam(self, *args, **kwargs)

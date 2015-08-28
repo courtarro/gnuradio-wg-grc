@@ -82,6 +82,7 @@ class Param(Element):
         value = n.find('value') or ''
         self._type = n.find('type') or 'raw'
         self._hide = n.find('hide') or ''
+        self._readonly = bool(n.find('readonly'))
         self._tab_label = n.find('tab') or block.get_param_tab_labels()[0]
         if not self._tab_label in block.get_param_tab_labels():
             block.get_param_tab_labels().append(self._tab_label)
@@ -155,6 +156,7 @@ class Param(Element):
 
     def get_type(self): return self.get_parent().resolve_dependencies(self._type)
     def get_tab_label(self): return self._tab_label
+    def is_readonly(self): return self._readonly
     def is_enum(self): return self._type == 'enum'
 
     def __repr__(self):

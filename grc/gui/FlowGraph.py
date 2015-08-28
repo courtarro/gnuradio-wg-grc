@@ -18,10 +18,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
 from Constants import SCROLL_PROXIMITY_SENSITIVITY, SCROLL_DISTANCE
+
 import Actions
 import Colors
 import Utils
+
 from Element import Element
+from .. base import uuid_helper
+
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -78,6 +82,7 @@ class FlowGraph(Element):
             key: the block key
             coor: an optional coordinate or None for random
         """
+        uuid = uuid_helper.new_uuid()
         id = self._get_unique_id(key)
         #calculate the position coordinate
         h_adj = self.get_scroll_pane().get_hadjustment()
@@ -90,6 +95,7 @@ class FlowGraph(Element):
         block = self.get_new_block(key)
         block.set_coordinate(coor)
         block.set_rotation(0)
+        block.get_param('uuid').set_value(uuid)
         block.get_param('id').set_value(id)
         Actions.ELEMENT_CREATE()
         return id
@@ -157,6 +163,8 @@ class FlowGraph(Element):
                     #if the block id is not unique, get a new block id
                     if param_value in [bluck.get_id() for bluck in self.get_blocks()]:
                         param_value = self._get_unique_id(param_value)
+                elif param_key == 'uuid':
+                    param_value = self._get_new_uuid_if_necessary(param_value)
                 #set value to key
                 block.get_param(param_key).set_value(param_value)
             #move block to offset coordinate

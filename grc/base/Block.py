@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
 from . import odict
+from . uuid_helper import valid_uuid_or_new
 from . Constants import ADVANCED_PARAM_TAB, DEFAULT_PARAM_TAB
 from . Constants import BLOCK_FLAG_THROTTLE, BLOCK_FLAG_DISABLE_BYPASS
 from . Constants import BLOCK_ENABLED, BLOCK_BYPASSED, BLOCK_DISABLED
@@ -90,7 +91,7 @@ class Block(Element):
         self._bussify_sink = n.find('bus_sink')
         self._bussify_source = n.find('bus_source')
         self._var_value = n.find('var_value') or '$value'
-
+        
         # get list of param tabs
         n_tabs = n.find('param_tab_order') or None
         self._param_tab_labels = n_tabs.findall('tab') if n_tabs is not None else [DEFAULT_PARAM_TAB]
@@ -98,6 +99,16 @@ class Block(Element):
         #create the param objects
         self._params = list()
         #add the id param
+        self.get_params().append(self.get_parent().get_parent().Param(
+            block=self,
+            n=odict({
+                'name': 'UUID',
+                'key': 'uuid',
+                'type': 'uuid',
+                'readonly': True,
+                'tab': ADVANCED_PARAM_TAB
+            })
+        ))
         self.get_params().append(self.get_parent().get_parent().Param(
             block=self,
             n=odict({
@@ -306,6 +317,7 @@ class Block(Element):
 
     def __str__(self): return 'Block - %s - %s(%s)'%(self.get_id(), self.get_name(), self.get_key())
 
+    def get_uuid(self): return self.get_param('uuid').get_value()
     def get_id(self): return self.get_param('id').get_value()
     def is_block(self): return True
     def get_name(self): return self._name
@@ -503,6 +515,7 @@ class Block(Element):
             n['bus_sink'] = str(1);
         if 'bus' in map(lambda a: a.get_type(), self.get_sources()):
             n['bus_source'] = str(1);
+            
         return n
 
     def import_data(self, n):

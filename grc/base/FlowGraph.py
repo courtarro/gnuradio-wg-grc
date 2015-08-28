@@ -21,6 +21,7 @@ import time
 from . import odict
 from Element import Element
 from .. gui import Messages
+from . import uuid_helper
 from . Constants import FLOW_GRAPH_FILE_FORMAT_VERSION
 
 
@@ -59,6 +60,13 @@ class FlowGraph(Element):
             index += 1
             #make sure that the id is not used by another block
             if not filter(lambda b: b.get_id() == id, self.get_blocks()): return id
+
+    def _get_new_uuid_if_necessary(self, old_uuid):
+        if filter(lambda b: b.get_uuid() == old_uuid, self.get_blocks()):
+            # Already have this uuid
+            return uuid_helper.new_uuid()
+        else:
+            return old_uuid
 
     def __str__(self):
         return 'FlowGraph - %s(%s)' % (self.get_option('title'), self.get_option('id'))
@@ -126,7 +134,7 @@ class FlowGraph(Element):
         return sorted(self.get_blocks_unordered(), key=lambda b: (
             b.get_key() != 'options',  # options to the front
             not b.get_key().startswith('variable'),  # then vars
-            str(b)
+            str(b.get_uuid())
         ))
     def get_connections(self): return filter(lambda e: e.is_connection(), self.get_elements())
     def get_children(self): return self.get_elements()

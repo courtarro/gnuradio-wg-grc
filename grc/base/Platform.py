@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 import os
 import sys
-from .. base import ParseXML, odict
+from .. base import ParseXML, odict, uuid_helper
 from Element import Element as _Element
 from FlowGraph import FlowGraph as _FlowGraph
 from Connection import Connection as _Connection
@@ -189,7 +189,25 @@ class Platform(_Element):
         flow_graph_file = flow_graph_file or self._default_flow_graph
         open(flow_graph_file, 'r')  # test open
         ParseXML.validate_dtd(flow_graph_file, FLOW_GRAPH_DTD)
-        return ParseXML.from_file(flow_graph_file)
+        new_graph = ParseXML.from_file(flow_graph_file)
+        
+        # Set any defaults that are missing
+        # In each block of the flow_graph, make sure it has a valid UUID
+        for block in new_graph.find('flow_graph').find('block'):
+            params = block.findall('param')
+            found_uuid = False
+            for param in params:
+                # UUIDs should be valid. If the UUID is invalid or not set, give it a random value
+                if param.find('key') == 'uuid':
+                    found_uuid = True
+                    value = param.find('value')
+                    param['value'] = uuid_helper.valid_uuid_or_new(value)
+            
+            if not(found_uuid):
+                uuid = odict({'key': 'uuid', 'value': uuid_helper.new_uuid()})
+                params.append(uuid)
+        
+        return new_graph
 
     def load_block_tree(self, block_tree):
         """
